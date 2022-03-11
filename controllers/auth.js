@@ -16,14 +16,14 @@ const login = async (req = request, res = response) => {
         // Verificar si el email existe
         if (!user) {
             return res.status(400).json({
-                msg: 'Email is not registered'
+                msg: 'El correo no está registrado'
             });
         }
 
         // Verificar si el usuario no está activo
-        if (!user.estado) {
+        if (!user.state) {
             return res.status(400).json({
-                msg: 'User has been deleted'
+                msg: 'El usuario ha sido eliminado'
             });
         }
 
@@ -31,7 +31,7 @@ const login = async (req = request, res = response) => {
         const validPassword = bcryptjs.compareSync(password, user.password);
         if (!validPassword) {
             return res.status(400).json({
-                msg: 'The password is not correct'
+                msg: 'La contraseña no es correcta'
             });
         }
 
@@ -46,12 +46,12 @@ const login = async (req = request, res = response) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            msg: 'Contact the administrator'
+            msg: 'Contacta con el administrador'
         })
     }
 }
 
-const revalidarToken = async (req, res = response) => {
+const revalidateToken = async (req, res = response) => {
 
     const { uid, name, email, role, img, state } = req;
 
@@ -73,5 +73,5 @@ const revalidarToken = async (req, res = response) => {
 
 module.exports = {
     login,
-    revalidarToken,
+    revalidateToken,
 }

@@ -8,22 +8,22 @@ const { generateJWT } = require('../helpers/generate-jwt');
 const cloudinary = require('cloudinary').v2
 cloudinary.config(process.env.CLOUDINARY_URL);
 
-const usuariosGet = async (req = request, res = response) => {
+const usersGet = async (req = request, res = response) => {
 
-    const { limite = 50, desde = 0, rol = "USER_ROLE" } = req.query;
+    const { limit = 50, from = 0, role = "USER_ROLE" } = req.query;
 
-    const query = { rol }
+    const query = { role }
 
-    const [total, usuarios] = await Promise.all([
-        Usuario.countDocuments(query),
-        Usuario.find(query)
-            .skip(Number(desde))
-            .limit(Number(limite))
+    const [total, users] = await Promise.all([
+        User.countDocuments(query),
+        User.find(query)
+            .skip(Number(from))
+            .limit(Number(limit))
     ]);
 
     res.json({
         total,
-        usuarios
+        users
     });
 }
 
@@ -46,40 +46,40 @@ const usuariosGetId = async (req = request, res = response) => {
     });
 }
 
-const usuariosPost = async (req = request, res = response) => {
+const userPost = async (req = request, res = response) => {
 
-    const { nombre, correo, password } = req.body;
-    const usuario = new Usuario({ nombre, correo, password });
+    const { name, email, password } = req.body;
+    const user = new User({ name, email, password });
 
     // Encriptar la contraseña
     const salt = bcryptjs.genSaltSync();
-    usuario.password = bcryptjs.hashSync(password, salt);
+    user.password = bcryptjs.hashSync(password, salt);
 
     // Guardar en la base de datos
-    await usuario.save();
+    await user.save();
 
     res.status(201).json({
-        usuario
+        user
     });
 
 }
 
-const usuariosPut = async (req = request, res = response) => {
+const userPut = async (req = request, res = response) => {
 
     const { id } = req.params;
-    const { nombre, correo, password, predeterminado, envio, estado, oldCorreo, img } = req.body;
+    const { name, email, password, predeterminado, envio, state, oldEmail, img } = req.body;
 
     //Validar el usuario a modificar respecto el usuario que viene en el JWT o es un Administrador
-    if (id !== req.uid && req.rol !== "ADMIN_ROLE") {
+    if (id !== req.uid && req.role !== "ADMIN_ROLE") {
         return res.status(401).json({
             ok: false,
             msg: 'No tiene privilegios para editar este usuario'
         });
     }
 
-    if (correo) {
-        const checkCorreo = await Usuario.findOne({ "correo": correo });
-        if (checkCorreo && oldCorreo !== correo) {
+    if (email) {
+        const checkEmail = await User.findOne({ "email": email });
+        if (checkEmail && oldEmail !== email) {
             return res.status(401).json({
                 ok: false,
                 msg: 'El correo ya existe en la base da datos'
@@ -98,39 +98,39 @@ const usuariosPut = async (req = request, res = response) => {
 
     // Borrar la imagen de la nube
     if (img === "") {
-        const checkImg = await Usuario.findById(id);
-        const nombreArr = checkImg.img.split('/');
-        const nombre = nombreArr[nombreArr.length - 1];
-        const [public_id] = nombre.split('.');
-        cloudinary.uploader.destroy(`ecommerce/usuarios/${public_id}`);
+        const checkImg = await User.findById(id);
+        const nameArr = checkImg.img.split('/');
+        const name = nameArr[nameArr.length - 1];
+        const [public_id] = name.split('.');
+        cloudinary.uploader.destroy(`travel-booking/users/${public_id}`);
     }
 
     // Actualizar la base de datos
-    const usuario = await Usuario.findByIdAndUpdate(id, { nombre, correo, password: newPassword, predeterminado, envio, estado, img }, { new: true });
+    const user = await User.findByIdAndUpdate(id, { name, email, password: newPassword, predeterminado, envio, state, img }, { new: true });
 
     // Actualizar el token del usuario en su navegador para sincronizar los datos correctamente
-    if (req.rol === "USER_ROLE") {
-        const token = await generateJWT(usuario._id, usuario.nombre, usuario.correo, usuario.rol, usuario.img, usuario.estado);
+    if (req.role === "USER_ROLE") {
+        const token = await generateJWT(user._id, user.name, user.email, user.role, user.img, user.state);
         return res.json({
-            usuario,
+            user,
             token
         });
     }
 
-    res.json(usuario);
+    res.json(user);
 }
 
-const usuariosDelete = async (req = request, res = response) => {
+const userDelete = async (req = request, res = response) => {
 
     const { id } = req.params;
 
     // Borrado fisico
-    // const usuario = await Usuario.findByIdAndDelete(id);
+    // const user = await User.findByIdAndDelete(id);
 
-    const usuario = await Usuario.findByIdAndUpdate(id, { estado: false }, { new: true });
+    const user = await User.findByIdAndUpdate(id, { state: false }, { new: true });
 
     res.json({
-        usuario
+        user
     });
 }
 
@@ -359,19 +359,17 @@ const usuariosDeseosDelete = async (req = request, res = response) => {
 }
 
 module.exports = {
-    usuariosGet,
+    usersGet,
     usuariosGetId,
-    usuariosPost,
-    usuariosPut,
-    usuariosDelete,
-    // usuariosPatch,
+    userPost,
+    userPut,
+    userDelete,
     usuariosEnvioGet,
     usuariosEnvioPost,
     usuariosEnvioPut,
     usuariosEnvioDelete,
     usuariosFacturacionGet,
     usuariosFacturacionPost,
-    //usuariosFacturacionPut,
     usuariosFacturacionDelete,
     usuariosDeseosGet,
     usuariosDeseosPost,

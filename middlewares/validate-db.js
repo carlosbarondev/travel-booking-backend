@@ -1,24 +1,10 @@
 const Hotel = require("../models/hotel");
 const User = require("../models/user");
 
-const emailExiste = async (correo = '') => {
-    const existeEmail = await Usuario.findOne({ correo });
-    if (existeEmail) {
-        throw new Error(`El correo ${correo} ya está registrado`)
-    }
-}
-
-const categoriaExiste = async (categoria = '') => {
-    const existeCategoria = await Categoria.findOne({ nombre: categoria });
-    if (!existeCategoria) {
-        throw new Error(`La categoria ${categoria} no existe`)
-    }
-}
-
-const subcategoriaExiste = async (categoria, subcategoria = '') => {
-    const existeSubCategoria = await Categoria.findOne({ nombre: categoria, "subcategorias": { $elemMatch: { "nombre": subcategoria } } });
-    if (!existeSubCategoria) {
-        throw new Error(`La subcategoria ${subcategoria} no existe`)
+const emailExists = async (email = '') => {
+    const exists = await User.findOne({ email });
+    if (exists) {
+        throw new Error(`The email ${email} is already registered`)
     }
 }
 
@@ -29,9 +15,9 @@ const productoExiste = async (producto = '') => {
     }
 }
 
-const existeUsuarioPorId = async (id) => {
-    const existeUsuario = await Usuario.findById(id);
-    if (!existeUsuario) {
+const existsUserId = async (id) => {
+    const existsUser = await User.findById(id);
+    if (!existsUser) {
         throw new Error(`El id ${id} no existe`)
     }
 }
@@ -63,20 +49,18 @@ const existeFacturacionPorId = async (id) => {
     }
 }
 
-const coleccionesPermitidas = (coleccion = '', colecciones = []) => {
-    const incluida = colecciones.includes(coleccion);
-    if (!incluida) {
-        throw new Error(`La colección ${coleccion} no es permitida, ${colecciones}`);
+const allowedCollections = (collection = '', collections = []) => {
+    const included = collections.includes(collection);
+    if (!included) {
+        throw new Error(`La colección ${collection} no es permitida, ${collections}`);
     }
     return true;
 }
 
 module.exports = {
-    emailExiste,
-    categoriaExiste,
-    subcategoriaExiste,
-    existeUsuarioPorId,
+    emailExists,
+    existsUserId,
     existeProductoPorId,
     existeFacturacionPorId,
-    coleccionesPermitidas
+    allowedCollections
 }

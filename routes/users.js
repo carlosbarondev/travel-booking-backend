@@ -3,15 +3,15 @@ const { check } = require('express-validator');
 
 const { validateFields } = require('../middlewares/validate-fields');
 const { validateJWT } = require('../middlewares/validate-jwt');
-const { emailExiste, existeUsuarioPorId } = require('../middlewares/validate-db');
+const { emailExists, existsUserId } = require('../middlewares/validate-db');
 const { checkAdmin } = require('../middlewares/validate-roles');
 
 const {
-    usuariosGet,
+    usersGet,
     usuariosGetId,
-    usuariosPost,
-    usuariosPut,
-    usuariosDelete,
+    userPost,
+    userPut,
+    userDelete,
     usuariosEnvioGet,
     usuariosEnvioPost,
     usuariosEnvioPut,
@@ -20,12 +20,12 @@ const {
 
 const router = Router();
 
-router.get('/', usuariosGet);
+router.get('/', usersGet);
 
 router.get('/:id', [
     validateJWT,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
 ], usuariosGetId);
 
@@ -33,39 +33,39 @@ router.post('/', [
     check('name', 'Name is required').not().isEmpty(),
     check('password', 'The password must be at least 6 characters long').isLength({ min: 6 }),
     check('email', 'Email is required').isEmail(),
-    check('email').custom(emailExiste),
+    check('email').custom(emailExists),
     validateFields
-], usuariosPost);
+], userPost);
 
 router.put('/:id', [
     validateJWT,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     //check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     //check('password', 'La contraseña debe tener al menos 6 caracteres').isLength({ min: 6 }),
     //check('correo', 'El correo no es válido').isEmail(),
     validateFields
-], usuariosPut);
+], userPut);
 
 router.delete('/:id', [
     validateJWT,
     checkAdmin,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
-], usuariosDelete);
+], userDelete);
 
 router.get('/billing/:id', [
     validateJWT,
     check('id', 'El id no es valido').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
 ], usuariosEnvioGet);
 
 router.post('/billing/:id', [
     validateJWT,
     check('id', 'El id no es valido').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     check('direccion.poblacion', 'La poblacion es obligatoria').not().isEmpty(),
     check('direccion.poblacion', 'La poblacion debe ser un string').isString(),
     check('direccion.pais', 'El pais es obligatorio').not().isEmpty(),
@@ -91,7 +91,7 @@ router.post('/billing/:id', [
 router.put('/billing/:id', [
     validateJWT,
     check('id', 'El id no es valido').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     check('direccion.poblacion', 'La poblacion es obligatoria').not().isEmpty(),
     check('direccion.poblacion', 'La poblacion debe ser un string').isString(),
     check('direccion.pais', 'El pais es obligatorio').not().isEmpty(),
@@ -117,7 +117,7 @@ router.put('/billing/:id', [
 router.delete('/billing/:id', [
     validateJWT,
     check('id', 'El id no es valido').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
 ], usuariosEnvioDelete);
 

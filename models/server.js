@@ -13,11 +13,11 @@ class Server {
         this.paths = {
             auth: '/auth',
             bookings: '/bookings',
-            home: '/',
             hotels: '/hotels',
             payments: '/payments',
             uploads: '/uploads',
             users: '/users',
+            home: '/',
         }
 
         // Conectar a la base de datos
@@ -56,11 +56,11 @@ class Server {
     routes() {
         this.app.use(this.paths.auth, require('../routes/auth'));
         this.app.use(this.paths.bookings, require('../routes/bookings'));
-        this.app.use(this.paths.home, require('../routes/home'));
         this.app.use(this.paths.hotels, require('../routes/hotels'));
         this.app.use(this.paths.payments, require('../routes/payments'));
         this.app.use(this.paths.uploads, require('../routes/uploads'));
         this.app.use(this.paths.users, require('../routes/users'));
+        this.app.use(this.paths.home, require('../routes/home'));
     }
 
     listen() {

@@ -28,7 +28,7 @@ const validateJWT = async (req = request, res = response, next) => {
         }
 
         // Verificar si el uid tiene estado=true(si no esta borrado)
-        if (!user.estado) {
+        if (!user.state) {
             return res.status(401).json({
                 msg: 'Invalid token - user with state: false'
             })

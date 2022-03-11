@@ -19,28 +19,22 @@ const UserSchema = Schema({
     },
     billing: { // Dirección de facturación
         city: {
-            type: String,
-            required: [true, 'City is required']
+            type: String
         },
         country: {
-            type: String,
-            required: [true, 'Country is required']
+            type: String
         },
         line1: {
-            type: String,
-            required: [true, 'Line1 is required']
+            type: String
         },
         line2: {
-            type: String,
-            required: [true, 'Line2 is required']
+            type: String
         },
         postal_code: {
-            type: Number,
-            required: [true, 'Postal_code is required']
+            type: Number
         },
         state: {
-            type: String,
-            required: [true, 'State is required']
+            type: String
         },
     },
     img: {
