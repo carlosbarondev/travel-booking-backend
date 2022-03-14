@@ -3,15 +3,15 @@ const { check } = require('express-validator');
 
 const { validateFields } = require('../middlewares/validate-fields');
 const { validateJWT } = require('../middlewares/validate-jwt');
-const { existeProductoPorId, existeUsuarioPorId } = require('../middlewares/validate-db');
+const { existsHotelId, existsUserId } = require('../middlewares/validate-db');
 const { checkAdmin } = require('../middlewares/validate-roles');
 
 const {
-    obtenerProductos,
-    obtenerProducto,
-    crearProducto,
-    actualizarProducto,
-    borrarProducto,
+    hotelsGet,
+    hotelGet,
+    hotelPost,
+    hotelUpdate,
+    hotelDelete,
     crearComentarioProducto,
     obtenerComentarioProducto,
     borrarComentarioProducto
@@ -19,11 +19,11 @@ const {
 
 const router = Router();
 
-router.get('/', obtenerProductos);
+router.get('/', hotelsGet);
 
-router.get('/hotel/:id', [
+router.get('/:id', [
     validateFields
-], obtenerProducto);
+], hotelGet);
 
 router.post('/', [
     validateJWT,
@@ -32,40 +32,40 @@ router.post('/', [
     check('country', 'Country is required').not().isEmpty(),
     check('city', 'City is required').not().isEmpty(),
     validateFields
-], crearProducto);
+], hotelPost);
 
 router.put('/:id', [
     validateJWT,
     checkAdmin,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeProductoPorId),
+    check('id').custom(existsHotelId),
     validateFields
-], actualizarProducto);
+], hotelUpdate);
 
 router.delete('/:id', [
     validateJWT,
     checkAdmin,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeProductoPorId),
+    check('id').custom(existsHotelId),
     validateFields
-], borrarProducto);
+], hotelDelete);
 
 router.get('/comment/:id', [
     validateJWT,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
 ], obtenerComentarioProducto);
 
 router.post('/comment/:id', [
     validateJWT,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeProductoPorId),
+    check('id').custom(existsHotelId),
     check('title', 'Title is required').not().isEmpty(),
     check('text', 'Text is required').not().isEmpty(),
     check('rating', 'Rating is required').not().isEmpty(),
     check('user', 'User is required').not().isEmpty(),
-    check('user').custom(existeUsuarioPorId),
+    check('user').custom(existsUserId),
     check('date', 'Date is required').not().isEmpty(),
     validateFields
 ], crearComentarioProducto);
@@ -73,7 +73,7 @@ router.post('/comment/:id', [
 router.delete('/comment/:id', [
     validateJWT,
     check('id', 'Id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
 ], borrarComentarioProducto);
 

@@ -4,35 +4,25 @@ const { response } = require("express");
 const Hotel = require("../models/hotel");
 const Booking = require("../models/booking");
 
-const obtenerProductos = async (req = request, res = response) => {
+const hotelsGet = async (req = request, res = response) => {
 
-    const { desde = 0, limite = 50, visibles = `{ "estado": "true" }`, ordenar = "-rating" } = req.query;
+    const { from = 0, limit = 50, visible = `{ "state": "true" }`, order = "-rating" } = req.query;
 
-    const [total, productos] = await Promise.all([
-        Producto.countDocuments(JSON.parse(visibles)),
-        Producto.find(JSON.parse(visibles))
-            .sort(ordenar)
-            .skip(Number(desde))
-            .limit(Number(limite))
-            .populate([
-                {
-                    path: 'categoria',
-                    match: { "estado": true }
-                },
-                {
-                    path: 'subcategoria',
-                    match: { "estado": true }
-                }
-            ])
+    const [total, hotels] = await Promise.all([
+        Hotel.countDocuments(JSON.parse(visible)),
+        Hotel.find(JSON.parse(visible))
+            .sort(order)
+            .skip(Number(from))
+            .limit(Number(limit))
     ]);
 
     res.json({
         total,
-        productos
+        hotels
     });
 }
 
-const obtenerProducto = async (req = request, res = response) => {
+const hotelGet = async (req = request, res = response) => {
 
     const { id } = req.params;
 
@@ -41,31 +31,27 @@ const obtenerProducto = async (req = request, res = response) => {
     if (mongoose.isValidObjectId(id)) { // El id puede ser un id de Mongo o el nombre del producto
         query = { "_id": id }
     } else {
-        query = { "nombre": id.replace(/-/g, ' ') }
+        query = { "name": id.replace(/-/g, ' ') }
     }
 
-    const producto = await Producto.findOne(query)
+    const hotel = await Hotel.findOne(query)
         .collation({ locale: "es", strength: 1 })
-        .populate("categoria subcategoria opinion.usuario")
-        .populate({
-            path: 'categoria',
-            populate: { path: 'subcategorias', match: { "estado": true } },
-        })
+        .populate("comments.user")
 
-    if (producto) {
-        if (producto.length === 0) {
+    if (hotel) {
+        if (hotel.length === 0) {
             return res.status(400).json({
-                msg: `El producto no existe`
+                msg: `El hotel no existe`
             });
         }
     } else {
         return res.status(400).json({
-            msg: `El producto no ha sido encontrado`
+            msg: `El hotel no ha sido encontrado`
         });
     }
 
     res.json({
-        producto
+        hotel
     });
 }
 
@@ -97,51 +83,67 @@ const obtenerMejoresProductosCategoria = async (req = request, res = response) =
 
 }
 
-const crearProducto = async (req, res = response) => {
+const hotelPost = async (req, res = response) => {
 
-    const { nombre, descripcion, precio, stock, categoria, subcategoria } = req.body;
+    const { name, stars, description, country, city } = req.body;
 
-    const producto = new Producto({ nombre, descripcion, precio, stock, categoria, subcategoria });
+    const hotel = new Hotel({ name, stars, description, country, city });
 
     // Guardar en la base de datos
-    await producto.save();
+    await hotel.save();
 
-    // Actualiza el campo Productos de la Subcategoria
-    await Subcategoria.findByIdAndUpdate(subcategoria, { "$push": { "productos": producto._id } }, { new: true });
-
-    res.status(201).json(producto);
+    res.status(201).json(hotel);
 
 };
 
-const actualizarProducto = async (req = request, res = response) => {
+const hotelUpdate = async (req = request, res = response) => {
 
     const { id } = req.params;
-    const { nombre, descripcion, precio, stock, img, categoria, subcategoria, oldSubcategoria, estado } = req.body;
+    const { name, stars, description, country, city, img, state, room, roomOp, idRoom, category, oldIdRoom, updateRoom, doublePrice, familyPrice, suitePrice } = req.body;
 
-    const producto = await Producto.findByIdAndUpdate(id, { nombre, descripcion, precio, stock, img, categoria, subcategoria, estado }, { new: true }); // new devuelve la respuesta actualizada
-
-    if (subcategoria) {
-        // Actualiza el campo Productos de la Subcategoria anterior
-        await Subcategoria.findByIdAndUpdate(oldSubcategoria, { "$pull": { "productos": producto._id } }, { new: true });
-        // Actualiza el campo Productos de la Subcategoria nueva
-        await Subcategoria.findByIdAndUpdate(subcategoria, { "$push": { "productos": producto._id } }, { new: true });
+    if (room) { // Habilitar o deshabilitar una habitación
+        await Hotel.findOneAndUpdate({ "rooms.idRoom": room }, { $set: { 'rooms.$.state': roomOp } });
     }
 
-    res.json(producto);
+    let hotel;
+
+    if (idRoom) { // Si se recibe idRoom se esta creando/actualizando una habitación
+        if (updateRoom) { //Actualizar o crear habitación
+            hotel = await Hotel.findOneAndUpdate({ "rooms.idRoom": oldIdRoom }, { $set: { 'rooms.$.idRoom': idRoom, 'rooms.$.category': category } }, { new: true });
+        } else {
+            const add = { "idRoom": idRoom, "category": category }
+            hotel = await Hotel.findByIdAndUpdate(id, { $push: { rooms: add } }, { new: true });
+        }
+    } else {
+        hotel = await Hotel.findByIdAndUpdate(
+            id,
+            {
+                name,
+                stars,
+                description,
+                country,
+                city,
+                img,
+                state,
+                $set: { "doubleRoom.price": doublePrice, "familyRoom.price": familyPrice, "suiteRoom.price": suitePrice },
+            },
+            { new: true });
+    }
+
+    res.json(hotel);
 }
 
-// borrarProducto - estado: false
-const borrarProducto = async (req = request, res = response) => {
+const hotelDelete = async (req = request, res = response) => {
 
     const { id } = req.params;
 
     // Borrado fisico
-    // const producto = await Producto.findByIdAndDelete(id);
+    // const hotel = await Hotel.findByIdAndDelete(id);
 
-    const productoBorrado = await Producto.findByIdAndUpdate(id, { estado: false }, { new: true });
+    const hotel = await Hotel.findByIdAndUpdate(id, { state: false }, { new: true });
 
     res.json({
-        productoBorrado
+        hotel
     });
 }
 
@@ -219,12 +221,12 @@ const borrarComentarioProducto = async (req = request, res = response) => {
 }
 
 module.exports = {
-    obtenerProductos,
-    obtenerProducto,
+    hotelsGet,
+    hotelGet,
     obtenerMejoresProductosCategoria,
-    crearProducto,
-    actualizarProducto,
-    borrarProducto,
+    hotelPost,
+    hotelUpdate,
+    hotelDelete,
     obtenerComentarioProducto,
     crearComentarioProducto,
     borrarComentarioProducto

@@ -10,7 +10,7 @@ const updateImageCloudinary = async (req, res = response) => {
 
     try {
 
-        const { id, collection } = req.params;
+        const { id, collection, roomType } = req.params;
 
         let model;
 
@@ -46,22 +46,48 @@ const updateImageCloudinary = async (req, res = response) => {
 
                 break;
 
+            case 'rooms':
+
+                model = await Hotel.findById(id);
+                if (!model) {
+                    return res.status(400).json({
+                        msg: `No existe un producto con el id ${id}`
+                    });
+                }
+
+                break;
+
             default:
                 return res.status(500).json({ msg: 'Se me olvidó validar esto' });
         }
 
         // Limpiar imágenes previas
-        if (model.img) {
-            // Hay que borrar la imagen del servidor
-            const nameArr = model.img.split('/');
-            const name = nameArr[nameArr.length - 1];
-            const [public_id] = name.split('.');
-            cloudinary.uploader.destroy(`travel-booking/${collection}/${public_id}`);
+        if (collection === "rooms") {
+            if (model[roomType].img) {
+                // Hay que borrar la imagen del servidor
+                const nameArr = model[roomType].img.split('/');
+                console.log(nameArr)
+                const name = nameArr[nameArr.length - 1];
+                const [public_id] = name.split('.');
+                cloudinary.uploader.destroy(`travel-booking/${collection}/${public_id}`);
+            }
+        } else {
+            if (model.img) {
+                // Hay que borrar la imagen del servidor
+                const nameArr = model.img.split('/');
+                const name = nameArr[nameArr.length - 1];
+                const [public_id] = name.split('.');
+                cloudinary.uploader.destroy(`travel-booking/${collection}/${public_id}`);
+            }
         }
 
         const { tempFilePath } = req.files.file;
         const { secure_url } = await cloudinary.uploader.upload(tempFilePath, { folder: `travel-booking/${collection}` });
-        model.img = secure_url;
+        if (collection === "rooms") {
+            model[roomType].img = secure_url;
+        } else {
+            model.img = secure_url;
+        }
 
         await model.save();
 

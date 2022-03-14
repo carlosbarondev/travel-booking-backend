@@ -10,6 +10,10 @@ const HotelSchema = Schema({
         type: String,
         required: [true, 'Description is required'],
     },
+    stars: {
+        type: Number,
+        required: [true, 'Stars is required'],
+    },
     country: {
         type: String,
         required: [true, 'Country is required'],
@@ -21,27 +25,71 @@ const HotelSchema = Schema({
     img: {
         type: String
     },
+    doubleRoom: {
+        name: {
+            type: String,
+            required: [true, 'Name is required'],
+            default: "Doble"
+        },
+        img: {
+            type: String,
+            default: ""
+        },
+        price: {
+            type: Number,
+            required: [true, 'Price is required'],
+            default: "0"
+        }
+    },
+    familyRoom: {
+        name: {
+            type: String,
+            required: [true, 'Name is required'],
+            default: "Familiar"
+        },
+        img: {
+            type: String,
+            default: ""
+        },
+        price: {
+            type: Number,
+            required: [true, 'Price is required'],
+            default: "0"
+        }
+    },
+    suiteRoom: {
+        name: {
+            type: String,
+            required: [true, 'Name is required'],
+            default: "Suite"
+        },
+        img: {
+            type: String,
+            default: ""
+        },
+        price: {
+            type: Number,
+            required: [true, 'Price is required'],
+            default: "0"
+        }
+    },
     rooms: [
         {
-            name: {
+            idRoom: {
                 type: String,
-                required: [true, 'Name is required'],
-            },
-            description: {
-                type: String,
-                required: [true, 'Description is required'],
+                required: [true, 'idRoom is required'],
             },
             category: {
                 type: String,
                 required: [true, 'Category is required'],
             },
-            capacity: {
-                type: Number,
-                required: [true, 'Capacity is required'],
+            state: {
+                type: Boolean,
+                default: true
             },
-            price: {
-                type: Number,
-                required: [true, 'Price is required'],
+            disable: {
+                type: Boolean,
+                default: true
             },
         }
     ],

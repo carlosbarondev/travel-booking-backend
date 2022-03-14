@@ -22,22 +22,22 @@ const existsUserId = async (id) => {
     }
 }
 
-const existeProductoPorId = async (id) => {
+const existsHotelId = async (id) => {
 
-    let existeProducto;
+    let existsHotel;
 
     if (Array.isArray(id)) { // Array de productos del pedido
         for (let i = 0; i < id.length; i++) {
-            existeProducto = await Producto.findById(id[i]);
-            if (!existeProducto) {
+            existsHotel = await Hotel.findById(id[i]);
+            if (!existsHotel) {
                 break;
             }
         }
     } else {
-        existeProducto = await Producto.findById(id);
+        existsHotel = await Hotel.findById(id);
     }
 
-    if (!existeProducto) {
+    if (!existsHotel) {
         throw new Error(`El id ${id} no existe`)
     }
 }
@@ -60,7 +60,7 @@ const allowedCollections = (collection = '', collections = []) => {
 module.exports = {
     emailExists,
     existsUserId,
-    existeProductoPorId,
+    existsHotelId,
     existeFacturacionPorId,
     allowedCollections
 }
