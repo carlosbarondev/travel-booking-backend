@@ -8,7 +8,7 @@ const { checkAdmin } = require('../middlewares/validate-roles');
 
 const {
     usersGet,
-    usuariosGetId,
+    userGetId,
     userPost,
     userPut,
     userDelete,
@@ -27,7 +27,7 @@ router.get('/:id', [
     check('id', 'Id is not valid').isMongoId(),
     check('id').custom(existsUserId),
     validateFields
-], usuariosGetId);
+], userGetId);
 
 router.post('/', [
     check('name', 'Name is required').not().isEmpty(),

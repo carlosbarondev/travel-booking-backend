@@ -27,7 +27,7 @@ const usersGet = async (req = request, res = response) => {
     });
 }
 
-const usuariosGetId = async (req = request, res = response) => {
+const userGetId = async (req = request, res = response) => {
 
     const query = { _id: req.params.id, estado: true }
 
@@ -39,10 +39,10 @@ const usuariosGetId = async (req = request, res = response) => {
         });
     }
 
-    const usuario = await Usuario.findOne(query);
+    const user = await User.findOne(query);
 
     res.json({
-        usuario
+        user
     });
 }
 
@@ -67,7 +67,16 @@ const userPost = async (req = request, res = response) => {
 const userPut = async (req = request, res = response) => {
 
     const { id } = req.params;
-    const { name, email, password, predeterminado, envio, state, oldEmail, img } = req.body;
+    const {
+        name,
+        email,
+        password,
+        state,
+        oldEmail,
+        img,
+        billing,
+        phone
+    } = req.body;
 
     //Validar el usuario a modificar respecto el usuario que viene en el JWT o es un Administrador
     if (id !== req.uid && req.role !== "ADMIN_ROLE") {
@@ -106,7 +115,7 @@ const userPut = async (req = request, res = response) => {
     }
 
     // Actualizar la base de datos
-    const user = await User.findByIdAndUpdate(id, { name, email, password: newPassword, predeterminado, envio, state, img }, { new: true });
+    const user = await User.findByIdAndUpdate(id, { name, email, password: newPassword, state, img, billing, phone }, { new: true });
 
     // Actualizar el token del usuario en su navegador para sincronizar los datos correctamente
     if (req.role === "USER_ROLE") {
@@ -360,7 +369,7 @@ const usuariosDeseosDelete = async (req = request, res = response) => {
 
 module.exports = {
     usersGet,
-    usuariosGetId,
+    userGetId,
     userPost,
     userPut,
     userDelete,
