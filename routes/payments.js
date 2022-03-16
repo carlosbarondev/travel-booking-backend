@@ -1,9 +1,9 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { mostrarPago, crearPago, mostrarUsuario } = require('../controllers/payments');
+const { mostrarPago, paymentPost, userGet } = require('../controllers/payments');
 const { validateFields } = require('../middlewares/validate-fields');
-const { existeUsuarioPorId } = require('../middlewares/validate-db');
+const { existsUserId } = require('../middlewares/validate-db');
 const { validateJWT } = require('../middlewares/validate-jwt');
 
 const router = Router();
@@ -11,9 +11,9 @@ const router = Router();
 router.get("/user/:id", [
     validateJWT,
     check('id', 'The id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
-], mostrarUsuario);
+], userGet);
 
 router.get("/:payment_intent", [
     validateJWT,
@@ -22,8 +22,8 @@ router.get("/:payment_intent", [
 router.post("/:id", [
     validateJWT,
     check('id', 'The id is not valid').isMongoId(),
-    check('id').custom(existeUsuarioPorId),
+    check('id').custom(existsUserId),
     validateFields
-], crearPago);
+], paymentPost);
 
 module.exports = router;

@@ -39,32 +39,23 @@ const obtenerPedidosUsuario = async (req = request, res = response) => {
     });
 }
 
-const crearPedido = async (req, res = response) => {
+const bookingPost = async (req, res = response) => {
 
-    const { idPedido, usuario, producto, fecha, direccionEnvio, direccionFacturacion, metodoPago, digitos, total } = req.body;
+    const { idBooking, user, booking, date, billing, payment_method, digits, total } = req.body;
 
-    const pedido = new Pedido({ idPedido, usuario, producto, fecha, direccionEnvio, direccionFacturacion, metodoPago, digitos, total });
+    const newBooking = new Booking({ idBooking, user, hotel: booking.idHotel, booking, date, billing, payment_method, digits, total });
 
     // Guardar en la base de datos
-    await pedido.save();
+    await newBooking.save();
 
-    const pedidoEnviar = await Pedido.findById(pedido._id)
-        .populate({
-            path: 'producto',
-            populate: {
-                path: 'producto',
-                populate: {
-                    path: 'categoria subcategoria'
-                }
-            },
-        })
+    const bookingSend = await Booking.findById(newBooking._id)
+        .populate("user hotel")
 
-    res.status(201).json(pedidoEnviar);
+    res.status(201).json(bookingSend);
 
 }
 
-
 module.exports = {
     obtenerPedidosUsuario,
-    crearPedido,
+    bookingPost,
 }

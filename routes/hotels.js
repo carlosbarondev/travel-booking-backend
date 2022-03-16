@@ -12,7 +12,7 @@ const {
     hotelPost,
     hotelUpdate,
     hotelDelete,
-    crearComentarioProducto,
+    commentPost,
     obtenerComentarioProducto,
     borrarComentarioProducto
 } = require('../controllers/hotels');
@@ -68,7 +68,7 @@ router.post('/comment/:id', [
     check('user').custom(existsUserId),
     check('date', 'Date is required').not().isEmpty(),
     validateFields
-], crearComentarioProducto);
+], commentPost);
 
 router.delete('/comment/:id', [
     validateJWT,

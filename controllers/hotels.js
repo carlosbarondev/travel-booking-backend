@@ -179,22 +179,22 @@ const obtenerComentarioProducto = async (req = request, res = response) => {
     });
 }
 
-const crearComentarioProducto = async (req, res = response) => {
+const commentPost = async (req, res = response) => {
 
     const { id } = req.params;
-    const { titulo, comentario, rating, usuario, fecha } = req.body;
+    const { title, text, rating, user, date } = req.body;
 
-    let producto;
+    let hotel;
 
-    const existeComentario = await Producto.findOne({ _id: id, "opinion.usuario": usuario });
+    const existsComment = await Hotel.findOne({ _id: id, "comments.user": user });
 
-    if (existeComentario) { // Si el usuario ya tiene un comentario en el producto lo actualiza
-        producto = await Producto.findOneAndUpdate({ _id: id, "opinion.usuario": usuario }, { '$set': { "opinion.$.titulo": titulo, "opinion.$.comentario": comentario, "opinion.$.rating": rating, "opinion.$.usuario": usuario, "opinion.$.fecha": fecha } }, { new: true }); // new devuelve la respuesta actualizada
+    if (existsComment) { // Si el usuario ya tiene un comentario en el producto lo actualiza
+        hotel = await Hotel.findOneAndUpdate({ _id: id, "comments.user": user }, { '$set': { "comments.$.title": title, "comments.$.text": text, "comments.$.rating": rating, "comments.$.user": user, "comments.$.date": date } }, { new: true }); // new devuelve la respuesta actualizada
     } else { // Si el usuario no tiene un comentario en el producto lo añade
-        producto = await Producto.findByIdAndUpdate(id, { $push: { "opinion": { titulo, comentario, rating, usuario, fecha } } }, { new: true }); // new devuelve la respuesta actualizada
+        hotel = await Hotel.findByIdAndUpdate(id, { $push: { "comments": { title, text, rating, user, date } } }, { new: true }); // new devuelve la respuesta actualizada
     }
 
-    res.json(producto);
+    res.json(hotel);
 
 }
 
@@ -228,6 +228,6 @@ module.exports = {
     hotelUpdate,
     hotelDelete,
     obtenerComentarioProducto,
-    crearComentarioProducto,
+    commentPost,
     borrarComentarioProducto
 }

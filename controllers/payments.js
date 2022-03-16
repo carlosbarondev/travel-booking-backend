@@ -9,11 +9,12 @@ const calculateOrderAmount = (items) => {
     // Replace this constant with a calculation of the order's amount
     // Calculate the order total on the server to prevent
     // people from directly manipulating the amount on the client
-    return parseFloat((Math.round((items.reduce((n, { unidades, producto }) => n + unidades * producto.precio * 100, 0) * 1000) / 10) / 100).toFixed(2));
+    const { rooms, days, roomType, persons, food, parking } = items;
+    return rooms * (days * (roomType?.price + (persons * food?.price))) + parking?.price;
 
 };
 
-const mostrarUsuario = async (req, res = response) => {
+const userGet = async (req, res = response) => {
 
     const { id } = req.params;
 
@@ -56,10 +57,10 @@ const mostrarPago = async (req, res = response) => {
 
 }
 
-const crearPago = async (req, res = response) => {
+const paymentPost = async (req, res = response) => {
 
     const { id } = req.params;
-    const { correo, direccion, items } = req.body;
+    const { email, name, phone, billing, idHotel, items } = req.body;
 
     // Alternatively, set up a webhook to listen for the payment_intent.succeeded event
     // and attach the PaymentMethod to a new Customer
@@ -76,28 +77,16 @@ const crearPago = async (req, res = response) => {
             customer = await stripe.customers.create({
                 id: id,
                 address: {
-                    city: direccion.facturacion.poblacion,
-                    country: direccion.facturacion.pais,
-                    line1: direccion.facturacion.calle,
-                    line2: direccion.facturacion.numero,
-                    postal_code: direccion.facturacion.codigo,
-                    state: direccion.facturacion.provincia
+                    city: billing.city,
+                    country: billing.country,
+                    line1: billing.line1,
+                    line2: billing.line2,
+                    postal_code: billing.postal_code,
+                    state: billing.state,
                 },
-                email: correo,
-                name: direccion.direccion.nombre,
-                phone: direccion.direccion.telefono,
-                shipping: {
-                    address: {
-                        city: direccion.direccion.direccion.poblacion,
-                        country: direccion.direccion.direccion.pais,
-                        line1: direccion.direccion.direccion.calle,
-                        line2: direccion.direccion.direccion.numero,
-                        postal_code: direccion.direccion.direccion.codigo,
-                        state: direccion.direccion.direccion.provincia
-                    },
-                    name: direccion.direccion.nombre,
-                    phone: direccion.direccion.telefono
-                }
+                email: email,
+                name: name,
+                phone: phone,
             });
 
         }
@@ -105,28 +94,16 @@ const crearPago = async (req, res = response) => {
         // El cliente existe y se actualiza con los datos del envio
         customer = await stripe.customers.update(id, {
             address: {
-                city: direccion.facturacion.poblacion,
-                country: direccion.facturacion.pais,
-                line1: direccion.facturacion.calle,
-                line2: direccion.facturacion.numero,
-                postal_code: direccion.facturacion.codigo,
-                state: direccion.facturacion.provincia
+                city: billing.city,
+                country: billing.country,
+                line1: billing.line1,
+                line2: billing.line2,
+                postal_code: billing.postal_code,
+                state: billing.state,
             },
-            email: correo,
-            name: direccion.direccion.nombre,
-            phone: direccion.direccion.telefono,
-            shipping: {
-                address: {
-                    city: direccion.direccion.direccion.poblacion,
-                    country: direccion.direccion.direccion.pais,
-                    line1: direccion.direccion.direccion.calle,
-                    line2: direccion.direccion.direccion.numero,
-                    postal_code: direccion.direccion.direccion.codigo,
-                    state: direccion.direccion.direccion.provincia
-                },
-                name: direccion.direccion.nombre,
-                phone: direccion.direccion.telefono
-            }
+            email: email,
+            name: name,
+            phone: phone,
         });
 
         // Create a PaymentIntent with the order amount and currency
@@ -140,10 +117,8 @@ const crearPago = async (req, res = response) => {
             },
         });
 
-        for (const item of items) { // Actualiza las unidades vendidas de una determinada categoría y producto
-            await Categoria.findByIdAndUpdate({ "_id": item.producto.categoria._id }, { $inc: { "vendidos": item.unidades } });
-            await Producto.findByIdAndUpdate({ "_id": item.producto._id }, { $inc: { "vendido": item.unidades, "stock": -item.unidades } });
-        }
+        // Actualiza las reservas totales del hotel
+        await Hotel.findByIdAndUpdate(idHotel, { $inc: { "bookings": items.rooms } });
 
         res.send({
             clientSecret: paymentIntent.client_secret,
@@ -159,7 +134,7 @@ const crearPago = async (req, res = response) => {
 };
 
 module.exports = {
-    mostrarUsuario,
+    userGet,
     mostrarPago,
-    crearPago,
+    paymentPost,
 }
