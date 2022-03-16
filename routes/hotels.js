@@ -12,9 +12,9 @@ const {
     hotelPost,
     hotelUpdate,
     hotelDelete,
-    commentPost,
-    obtenerComentarioProducto,
-    borrarComentarioProducto
+    userCommentPost,
+    userCommentsGet,
+    userCommentDelete
 } = require('../controllers/hotels');
 
 const router = Router();
@@ -55,7 +55,7 @@ router.get('/comment/:id', [
     check('id', 'Id is not valid').isMongoId(),
     check('id').custom(existsUserId),
     validateFields
-], obtenerComentarioProducto);
+], userCommentsGet);
 
 router.post('/comment/:id', [
     validateJWT,
@@ -68,13 +68,13 @@ router.post('/comment/:id', [
     check('user').custom(existsUserId),
     check('date', 'Date is required').not().isEmpty(),
     validateFields
-], commentPost);
+], userCommentPost);
 
 router.delete('/comment/:id', [
     validateJWT,
     check('id', 'Id is not valid').isMongoId(),
     check('id').custom(existsUserId),
     validateFields
-], borrarComentarioProducto);
+], userCommentDelete);
 
 module.exports = router;

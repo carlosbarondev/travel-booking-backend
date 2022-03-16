@@ -2,7 +2,7 @@ const { response } = require("express");
 
 const Booking = require("../models/booking");
 
-const obtenerPedidosUsuario = async (req = request, res = response) => {
+const bookingsGet = async (req = request, res = response) => {
 
     const { id } = req.params;
 
@@ -14,28 +14,17 @@ const obtenerPedidosUsuario = async (req = request, res = response) => {
         });
     }
 
-    // const { limite = 5, desde = 0 } = req.query;
-    const query = { usuario: id }
+    const query = { user: id }
 
-    const [total, pedidos] = await Promise.all([
-        Pedido.countDocuments(query),
-        Pedido.find(query)
-            .populate({
-                path: 'producto',
-                populate: {
-                    path: 'producto',
-                    populate: {
-                        path: 'categoria subcategoria'
-                    }
-                },
-            })
-        // .skip(Number(desde))
-        // .limit(Number(limite))
+    const [total, bookings] = await Promise.all([
+        Booking.countDocuments(query),
+        Booking.find(query)
+            .populate("user hotel")
     ]);
 
     res.json({
         total,
-        pedidos
+        bookings
     });
 }
 
@@ -56,6 +45,6 @@ const bookingPost = async (req, res = response) => {
 }
 
 module.exports = {
-    obtenerPedidosUsuario,
+    bookingsGet,
     bookingPost,
 }

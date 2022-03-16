@@ -6,7 +6,7 @@ const { validateJWT } = require('../middlewares/validate-jwt');
 const { existsUserId } = require('../middlewares/validate-db');
 
 const {
-    bookingPost, obtenerPedidosUsuario,
+    bookingPost, bookingsGet,
 } = require('../controllers/bookings');
 
 const router = Router();
@@ -16,7 +16,7 @@ router.get('/:id', [
     check('id', 'Id is not valid').isMongoId(),
     check('id').custom(existsUserId),
     validateFields
-], obtenerPedidosUsuario);
+], bookingsGet);
 
 router.post('/', [
     validateJWT,

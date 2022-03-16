@@ -147,7 +147,7 @@ const hotelDelete = async (req = request, res = response) => {
     });
 }
 
-const obtenerComentarioProducto = async (req = request, res = response) => {
+const userCommentsGet = async (req = request, res = response) => {
 
     const { id } = req.params;
 
@@ -159,27 +159,27 @@ const obtenerComentarioProducto = async (req = request, res = response) => {
         });
     }
 
-    const valorados = await Producto.find({ "opinion.usuario": id }, { "nombre": 1, "categoria": 1, "subcategoria": 1, "img": 1, "opinion.$": 1 })
-        .populate("subcategoria categoria");
+    const valued = await Hotel.find({ "comments.user": id }, { "name": 1, "img": 1, "comments.$": 1 })
+        .populate("comments.user");
 
-    const productosSinOpinionUsuario = await Producto.find({ "opinion.usuario": { $nin: id } }).populate("subcategoria categoria");
+    const noOpinion = await Hotel.find({ "comments.user": { $nin: id } }).populate("comments.user");
 
-    const noValorados = [];
+    const notValued = [];
 
-    for (const producto of productosSinOpinionUsuario) {
-        const pedidos = await Pedido.find({ "usuario": id, "producto.producto": { $in: [producto._id] } });
-        if (pedidos.length > 0) {
-            noValorados.push(producto)
+    for (const hotel of noOpinion) {
+        const bookings = await Booking.find({ "user": id, "hotel": { $in: [hotel._id] } });
+        if (bookings.length > 0) {
+            notValued.push(hotel)
         }
     }
 
     res.json({
-        valorados,
-        noValorados
+        valued,
+        notValued
     });
 }
 
-const commentPost = async (req, res = response) => {
+const userCommentPost = async (req, res = response) => {
 
     const { id } = req.params;
     const { title, text, rating, user, date } = req.body;
@@ -198,11 +198,10 @@ const commentPost = async (req, res = response) => {
 
 }
 
-// borrarProducto - estado: false
-const borrarComentarioProducto = async (req = request, res = response) => {
+const userCommentDelete = async (req = request, res = response) => {
 
     const { id } = req.params;
-    const { idProducto, idComentario } = req.body;
+    const { idHotel, idComment } = req.body;
 
     //Validar el usuario a eliminar respecto el usuario que viene en el JWT
     if (id !== req.uid) {
@@ -213,10 +212,10 @@ const borrarComentarioProducto = async (req = request, res = response) => {
     }
 
     // Borrado fisico
-    const comentarioBorrado = await Producto.findOneAndUpdate({ "_id": idProducto }, { $pull: { opinion: { _id: idComentario } } }, { new: true });
+    const commentDeleted = await Hotel.findOneAndUpdate({ "_id": idHotel }, { $pull: { comments: { _id: idComment } } }, { new: true });
 
     res.json({
-        comentarioBorrado
+        commentDeleted
     });
 }
 
@@ -227,7 +226,7 @@ module.exports = {
     hotelPost,
     hotelUpdate,
     hotelDelete,
-    obtenerComentarioProducto,
-    commentPost,
-    borrarComentarioProducto
+    userCommentsGet,
+    userCommentPost,
+    userCommentDelete
 }
