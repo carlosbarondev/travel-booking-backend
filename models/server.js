@@ -15,6 +15,7 @@ class Server {
             bookings: '/bookings',
             hotels: '/hotels',
             payments: '/payments',
+            rooms: '/rooms',
             uploads: '/uploads',
             users: '/users',
             home: '/',
@@ -58,6 +59,7 @@ class Server {
         this.app.use(this.paths.bookings, require('../routes/bookings'));
         this.app.use(this.paths.hotels, require('../routes/hotels'));
         this.app.use(this.paths.payments, require('../routes/payments'));
+        this.app.use(this.paths.rooms, require('../routes/rooms'));
         this.app.use(this.paths.uploads, require('../routes/uploads'));
         this.app.use(this.paths.users, require('../routes/users'));
         this.app.use(this.paths.home, require('../routes/home'));

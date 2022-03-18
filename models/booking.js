@@ -33,6 +33,16 @@ const BookingSchema = Schema({
     total: {
         type: Number,
         required: [true, 'Total is required'],
+    },
+    room: {
+        type: Schema.Types.ObjectId,
+        ref: 'Room'
+    },
+    start: {
+        type: Date,
+    },
+    end: {
+        type: Date,
     }
 });
 

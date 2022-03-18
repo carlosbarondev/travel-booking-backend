@@ -30,15 +30,15 @@ const bookingsGet = async (req = request, res = response) => {
 
 const bookingPost = async (req, res = response) => {
 
-    const { idBooking, user, booking, date, billing, payment_method, digits, total } = req.body;
+    const { idBooking, user, booking, date, billing, payment_method, digits, total, room, start, end } = req.body;
 
-    const newBooking = new Booking({ idBooking, user, hotel: booking.idHotel, booking, date, billing, payment_method, digits, total });
+    const newBooking = new Booking({ idBooking, user, hotel: booking.idHotel, booking, date, billing, payment_method, digits, total, room, start, end });
 
     // Guardar en la base de datos
     await newBooking.save();
 
     const bookingSend = await Booking.findById(newBooking._id)
-        .populate("user hotel")
+        .populate("user hotel room")
 
     res.status(201).json(bookingSend);
 

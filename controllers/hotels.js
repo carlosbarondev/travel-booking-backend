@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const { response } = require("express");
 
-const Hotel = require("../models/hotel");
 const Booking = require("../models/booking");
+const Hotel = require("../models/hotel");
+const Room = require("../models/room");
 
 const hotelsGet = async (req = request, res = response) => {
 
@@ -25,6 +26,7 @@ const hotelsGet = async (req = request, res = response) => {
 const hotelGet = async (req = request, res = response) => {
 
     const { id } = req.params;
+    const { from_date, to_date } = req.query;
 
     let query;
 
@@ -50,8 +52,30 @@ const hotelGet = async (req = request, res = response) => {
         });
     }
 
+    const bookings = await Booking
+        .find({
+            $or: [
+                { start: { $gte: from_date, $lte: to_date } },
+                {
+                    end: { $gte: from_date, $lte: to_date }
+                },
+                {
+                    $and: [{ start: { $lte: from_date } }, { end: { $gte: to_date } }]
+                },
+            ],
+        })
+        .select('room');
+
+    const roomIds = bookings.map(b => b.room);
+
+    const availableRooms = await Room
+        .find({ _id: { $nin: roomIds } })
+
+    console.log(availableRooms);
+
     res.json({
-        hotel
+        hotel,
+        availableRooms
     });
 }
 

@@ -73,27 +73,6 @@ const HotelSchema = Schema({
             default: "0"
         }
     },
-    rooms: [
-        {
-            idRoom: {
-                type: String,
-                required: [true, 'idRoom is required'],
-            },
-            category: {
-                type: String,
-                required: [true, 'Category is required'],
-            },
-            date: {},
-            state: {
-                type: Boolean,
-                default: true
-            },
-            disable: {
-                type: Boolean,
-                default: true
-            },
-        }
-    ],
     bookings: {
         type: Number,
         default: 0
