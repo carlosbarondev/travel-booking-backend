@@ -36,7 +36,6 @@ router.post('/', [
 
 router.put('/:id', [
     validateJWT,
-    checkAdmin,
     check('id', 'Id is not valid').isMongoId(),
     check('id').custom(existsHotelId),
     validateFields

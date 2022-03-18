@@ -83,6 +83,7 @@ const HotelSchema = Schema({
                 type: String,
                 required: [true, 'Category is required'],
             },
+            date: {},
             state: {
                 type: Boolean,
                 default: true

@@ -28,7 +28,7 @@ const hotelGet = async (req = request, res = response) => {
 
     let query;
 
-    if (mongoose.isValidObjectId(id)) { // El id puede ser un id de Mongo o el nombre del producto
+    if (mongoose.isValidObjectId(id)) { // El id puede ser un id de Mongo o el nombre del hotel
         query = { "_id": id }
     } else {
         query = { "name": id.replace(/-/g, ' ') }
@@ -99,7 +99,7 @@ const hotelPost = async (req, res = response) => {
 const hotelUpdate = async (req = request, res = response) => {
 
     const { id } = req.params;
-    const { name, stars, description, country, city, img, state, room, roomOp, idRoom, category, oldIdRoom, updateRoom, doublePrice, familyPrice, suitePrice } = req.body;
+    const { name, stars, description, country, city, img, state, room, roomOp, idRoom, category, oldIdRoom, updateRoom, doublePrice, familyPrice, suitePrice, date } = req.body;
 
     if (room) { // Habilitar o deshabilitar una habitación
         await Hotel.findOneAndUpdate({ "rooms.idRoom": room }, { $set: { 'rooms.$.state': roomOp } });
@@ -108,11 +108,13 @@ const hotelUpdate = async (req = request, res = response) => {
     let hotel;
 
     if (idRoom) { // Si se recibe idRoom se esta creando/actualizando una habitación
-        if (updateRoom) { //Actualizar o crear habitación
+        if (updateRoom) { // Actualizar habitación
             hotel = await Hotel.findOneAndUpdate({ "rooms.idRoom": oldIdRoom }, { $set: { 'rooms.$.idRoom': idRoom, 'rooms.$.category': category } }, { new: true });
-        } else {
+        } else if (!updateRoom && !date) { // Crear habitación
             const add = { "idRoom": idRoom, "category": category }
             hotel = await Hotel.findByIdAndUpdate(id, { $push: { rooms: add } }, { new: true });
+        } else { // Actualizar habitación con la fecha de la reserva
+            hotel = await Hotel.findOneAndUpdate({ "rooms.idRoom": idRoom }, { $set: { 'rooms.$.date': date } }, { new: true });
         }
     } else {
         hotel = await Hotel.findByIdAndUpdate(
