@@ -52,15 +52,20 @@ const hotelGet = async (req = request, res = response) => {
         });
     }
 
-    const bookings = await Booking
+    const bookings = await Booking // Habitaciones disponibles en la fecha dada
         .find({
             $or: [
-                { start: { $gte: from_date, $lte: to_date } },
+                {
+                    start: { $gte: from_date, $lte: to_date }
+                },
                 {
                     end: { $gte: from_date, $lte: to_date }
                 },
                 {
-                    $and: [{ start: { $lte: from_date } }, { end: { $gte: to_date } }]
+                    $and: [
+                        { start: { $lte: from_date } },
+                        { end: { $gte: to_date } }
+                    ]
                 },
             ],
         })
@@ -70,8 +75,7 @@ const hotelGet = async (req = request, res = response) => {
 
     const availableRooms = await Room
         .find({ _id: { $nin: roomIds } })
-
-    console.log(availableRooms);
+        .where('hotel').equals(hotel._id) // Filtrar por hotel
 
     res.json({
         hotel,
