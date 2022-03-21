@@ -7,7 +7,7 @@ const Room = require("../models/room");
 
 const hotelsGet = async (req = request, res = response) => {
 
-    const { from = 0, limit = 50, visible = `{ "state": "true" }`, order = "-rating" } = req.query;
+    const { from = 0, limit = 50, visible = `{ "state": "true" }`, order = "-rating", from_date, to_date } = req.query;
 
     const [total, hotels] = await Promise.all([
         Hotel.countDocuments(JSON.parse(visible)),
@@ -17,9 +17,41 @@ const hotelsGet = async (req = request, res = response) => {
             .limit(Number(limit))
     ]);
 
+    const bookings = await Booking // Habitaciones disponibles en la fecha dada
+        .find({
+            $or: [
+                {
+                    start: { $gte: from_date, $lte: to_date }
+                },
+                {
+                    end: { $gte: from_date, $lte: to_date }
+                },
+                {
+                    $and: [
+                        { start: { $lte: from_date } },
+                        { end: { $gte: to_date } }
+                    ]
+                },
+            ],
+        })
+        .select('room');
+
+    const roomIds = bookings.map(b => b.room);
+
+    const availableRooms = await Room
+        .find({ _id: { $nin: roomIds } })
+        .populate("hotel")
+        .select('hotel');
+
+    // Filtrar por hotel
+    const hotelIds = availableRooms.map(b => b.hotel);
+
+    const availableHotels = [...new Map(hotelIds.slice().reverse().map(v => [v.name, v])).values()].reverse();
+
     res.json({
         total,
-        hotels
+        hotels,
+        availableHotels
     });
 }
 
