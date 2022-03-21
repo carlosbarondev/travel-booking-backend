@@ -7,7 +7,7 @@ const Room = require("../models/room");
 
 const hotelsGet = async (req = request, res = response) => {
 
-    const { from = 0, limit = 50, visible = `{ "state": "true" }`, order = "-rating", from_date, to_date } = req.query;
+    const { from = 0, limit = 50, visible = `{ "state": "true" }`, order = "-rating", country, from_date, to_date } = req.query;
 
     const [total, hotels] = await Promise.all([
         Hotel.countDocuments(JSON.parse(visible)),
@@ -17,41 +17,54 @@ const hotelsGet = async (req = request, res = response) => {
             .limit(Number(limit))
     ]);
 
-    const bookings = await Booking // Habitaciones disponibles en la fecha dada
-        .find({
-            $or: [
-                {
-                    start: { $gte: from_date, $lte: to_date }
-                },
-                {
-                    end: { $gte: from_date, $lte: to_date }
-                },
-                {
-                    $and: [
-                        { start: { $lte: from_date } },
-                        { end: { $gte: to_date } }
-                    ]
-                },
-            ],
-        })
-        .select('room');
+    let availableRooms;
+    let availableHotels;
+    let final;
 
-    const roomIds = bookings.map(b => b.room);
+    if (from_date && to_date) {
 
-    const availableRooms = await Room
-        .find({ _id: { $nin: roomIds } })
-        .populate("hotel")
-        .select('hotel');
+        const bookings = await Booking // Habitaciones disponibles en la fecha dada
+            .find({
+                $or: [
+                    {
+                        start: { $gte: from_date, $lte: to_date }
+                    },
+                    {
+                        end: { $gte: from_date, $lte: to_date }
+                    },
+                    {
+                        $and: [
+                            { start: { $lte: from_date } },
+                            { end: { $gte: to_date } }
+                        ]
+                    },
+                ],
+            })
+            .select('room');
 
-    // Filtrar por hotel
-    const hotelIds = availableRooms.map(b => b.hotel);
+        const roomIds = bookings.map(b => b.room);
+        availableRooms = await Room
+            .find({ _id: { $nin: roomIds } })
+            .populate("hotel")
+            .select('hotel');
 
-    const availableHotels = [...new Map(hotelIds.slice().reverse().map(v => [v.name, v])).values()].reverse();
+        // Filtrar por hotel
+        const hotelIds = availableRooms.map(b => b.hotel);
+        availableHotels = [...new Map(hotelIds.slice().reverse().map(v => [v.name, v])).values()].reverse();
+
+        // Filtrar por país
+        final = availableHotels.filter(hotel => hotel.country === country);
+    }
+
+    // Obtener los países con hoteles
+    const countries = hotels.map(b => b.country);
+    const availableCountries = [...new Map(countries.slice().map(v => [v, v])).values()];
 
     res.json({
         total,
         hotels,
-        availableHotels
+        final,
+        availableCountries
     });
 }
 
