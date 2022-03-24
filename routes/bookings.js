@@ -3,10 +3,10 @@ const { check, body } = require('express-validator');
 
 const { validateFields } = require('../middlewares/validate-fields');
 const { validateJWT } = require('../middlewares/validate-jwt');
-const { existsUserId } = require('../middlewares/validate-db');
+const { existsUserId, existsBookingId } = require('../middlewares/validate-db');
 
 const {
-    bookingPost, bookingsGet,
+    bookingPost, bookingsGet, bookingDelete,
 } = require('../controllers/bookings');
 
 const router = Router();
@@ -27,5 +27,12 @@ router.post('/', [
     check('digits', 'Digits are required').not().isEmpty(),
     validateFields
 ], bookingPost);
+
+router.delete('/:id', [
+    validateJWT,
+    check('id', 'Id is not valid').isMongoId(),
+    check('id').custom(existsBookingId),
+    validateFields
+], bookingDelete);
 
 module.exports = router;

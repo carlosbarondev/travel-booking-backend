@@ -1,6 +1,7 @@
 const Hotel = require("../models/hotel");
 const Room = require("../models/room");
 const User = require("../models/user");
+const Booking = require("../models/booking");
 
 const emailExists = async (email = '') => {
     const exists = await User.findOne({ email });
@@ -30,6 +31,13 @@ const existsRoomId = async (id) => {
     }
 }
 
+const existsBookingId = async (id) => {
+    const existsBooking = await Booking.findById(id);
+    if (!existsBooking) {
+        throw new Error(`El id ${id} no existe`)
+    }
+}
+
 const allowedCollections = (collection = '', collections = []) => {
     const included = collections.includes(collection);
     if (!included) {
@@ -43,5 +51,6 @@ module.exports = {
     existsUserId,
     existsHotelId,
     existsRoomId,
+    existsBookingId,
     allowedCollections
 }

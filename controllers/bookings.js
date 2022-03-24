@@ -44,7 +44,26 @@ const bookingPost = async (req, res = response) => {
 
 }
 
+const bookingDelete = async (req = request, res = response) => {
+
+    const { id } = req.params;
+
+    // Borrado fisico
+    const bookings = await Booking.findByIdAndDelete(id);
+
+    res.json({
+        bookings
+    });
+}
+
+/*const usuariosPatch = (req = request, res = response) => {
+    res.json({
+        msg: 'patch API - usuariosPatch',
+    });
+}*/
+
 module.exports = {
     bookingsGet,
     bookingPost,
+    bookingDelete,
 }
