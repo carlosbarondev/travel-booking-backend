@@ -9,8 +9,8 @@ const calculateOrderAmount = (items) => {
     // Replace this constant with a calculation of the order's amount
     // Calculate the order total on the server to prevent
     // people from directly manipulating the amount on the client
-    const { rooms, days, roomType, persons, food, parking } = items;
-    return rooms * (days * (roomType?.price + (persons * food?.price))) + parking?.price;
+    const { days, adults, children, roomType, food, parking } = items;
+    return days * ((roomType?.price ? roomType?.price : 0) + ((adults + children) * (food?.price ? food?.price : 0))) + (parking?.price ? parking?.price : 0);
 
 };
 
@@ -118,7 +118,7 @@ const paymentPost = async (req, res = response) => {
         });
 
         // Actualiza las reservas totales del hotel
-        await Hotel.findByIdAndUpdate(idHotel, { $inc: { "bookings": items.rooms } });
+        await Hotel.findByIdAndUpdate(idHotel, { $inc: { "bookings": 1 } });
 
         res.send({
             clientSecret: paymentIntent.client_secret,
