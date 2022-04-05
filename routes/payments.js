@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { mostrarPago, paymentPost, userGet } = require('../controllers/payments');
+const { paymentGet, paymentPost, userGet } = require('../controllers/payments');
 const { validateFields } = require('../middlewares/validate-fields');
 const { existsUserId } = require('../middlewares/validate-db');
 const { validateJWT } = require('../middlewares/validate-jwt');
@@ -17,7 +17,7 @@ router.get("/user/:id", [
 
 router.get("/:payment_intent", [
     validateJWT,
-], mostrarPago);
+], paymentGet);
 
 router.post("/:id", [
     validateJWT,

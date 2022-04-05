@@ -62,7 +62,7 @@ const hotelsGet = async (req = request, res = response) => {
         availableHotels = [...new Map(hotelIds.slice().reverse().map(v => [v.name, v])).values()].reverse();
 
         // Filtrar por país
-        final = availableHotels.filter(hotel => hotel.country === country);
+        final = availableHotels.filter(hotel => hotel.country === country && hotel.state === true);
     }
 
     // Obtener los países con hoteles
@@ -137,32 +137,23 @@ const hotelGet = async (req = request, res = response) => {
     });
 }
 
-const obtenerMejoresProductosCategoria = async (req = request, res = response) => {
+const hotelsGetCountries = async (req = request, res = response) => {
 
-    const { desde = 0, limite = 50, visibles = true, categoria, ordenar } = req.query;
+    const [esp, fr, it, en, al] = await Promise.all([
+        Hotel.countDocuments({ "country": "España", "state": "true" }),
+        Hotel.countDocuments({ "country": "Francia", "state": "true" }),
+        Hotel.countDocuments({ "country": "Italia", "state": "true" }),
+        Hotel.countDocuments({ "country": "Inglaterra", "state": "true" }),
+        Hotel.countDocuments({ "country": "Alemania", "state": "true" }),
+    ]);
 
-    try {
-
-        const idProducto = await Categoria.findOne({ nombre: categoria });
-
-        const productos = await Producto.find({ categoria: idProducto._id, estado: visibles })
-            .collation({ locale: "es", strength: 1 })
-            .sort(ordenar)
-            .skip(Number(desde))
-            .limit(Number(limite))
-            .populate("categoria subcategoria");
-
-        res.json({
-            productos
-        });
-
-    } catch (error) {
-        console.log(error);
-        return res.status(400).json({
-            msg: error
-        });
-    }
-
+    res.json({
+        esp,
+        fr,
+        it,
+        en,
+        al
+    });
 }
 
 const hotelPost = async (req, res = response) => {
@@ -306,7 +297,7 @@ const userCommentDelete = async (req = request, res = response) => {
 module.exports = {
     hotelsGet,
     hotelGet,
-    obtenerMejoresProductosCategoria,
+    hotelsGetCountries,
     hotelPost,
     hotelUpdate,
     hotelDelete,

@@ -35,7 +35,7 @@ const userGet = async (req, res = response) => {
 
 }
 
-const mostrarPago = async (req, res = response) => {
+const paymentGet = async (req, res = response) => {
 
     const { payment_intent } = req.params;
 
@@ -135,6 +135,6 @@ const paymentPost = async (req, res = response) => {
 
 module.exports = {
     userGet,
-    mostrarPago,
+    paymentGet,
     paymentPost,
 }

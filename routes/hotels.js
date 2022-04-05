@@ -14,16 +14,20 @@ const {
     hotelDelete,
     userCommentPost,
     userCommentsGet,
-    userCommentDelete
+    userCommentDelete,
+    hotelsGetCountries
 } = require('../controllers/hotels');
 
 const router = Router();
 
 router.get('/', hotelsGet);
 
+router.get('/countries', hotelsGetCountries);
+
 router.get('/:id', [
     validateFields
 ], hotelGet);
+
 
 router.post('/', [
     validateJWT,
