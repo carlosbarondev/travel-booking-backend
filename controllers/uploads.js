@@ -66,7 +66,6 @@ const updateImageCloudinary = async (req, res = response) => {
             if (model[roomType].img) {
                 // Hay que borrar la imagen del servidor
                 const nameArr = model[roomType].img.split('/');
-                console.log(nameArr)
                 const name = nameArr[nameArr.length - 1];
                 const [public_id] = name.split('.');
                 cloudinary.uploader.destroy(`travel-booking/${collection}/${public_id}`);
