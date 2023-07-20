@@ -2,7 +2,7 @@
 
 API REST de una cadena hotelera, construido con Node, Express y MongoDB.
 
-[VISTA PREVIA](https://travel-booking-carlosbarondev.up.railway.app/) *(El servidor arranca en 10 segundos aproximadamente)*
+[VISTA PREVIA](https://travel-booking-carlosbarondev.onrender.com/)
 
 [Frontend](https://github.com/carlosbarondev/travel-booking-frontend)
 
@@ -44,5 +44,5 @@ API REST de una cadena hotelera, construido con Node, Express y MongoDB.
 
 ## Links
 
-* [Website](https://travel-booking-carlosbarondev.up.railway.app/) *(El servidor arranca en 10 segundos aproximadamente)*
+* [Website](https://travel-booking-carlosbarondev.onrender.com/)
 * [Frontend](https://github.com/carlosbarondev/travel-booking-frontend)
